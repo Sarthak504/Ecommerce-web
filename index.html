@@ -3,225 +3,1319 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OtakuSip</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
+<title>OtakuSip — Handcrafted Anime Mugs for True Fans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#020617;color:#fff}
+  /* ===== CSS VARIABLES ===== */
+  :root {
+    --bg-deep:    #07070f;
+    --bg-card:    #0f0f1e;
+    --bg-surface: #151528;
+    --purple:     #7c3aed;
+    --purple-lite: #9d5cf0;
+    --gold:       #f4a718;
+    --gold-lite:  #fbbf24;
+    --text-main:  #e8e0ff;
+    --text-muted: #8b82b0;
+    --danger:     #ef4444;
+    --success:    #22c55e;
+    --border:     rgba(124, 58, 237, 0.22);
+    --glow:       0 0 24px rgba(124,58,237,0.35);
+    --glow-gold:  0 0 20px rgba(244,167,24,0.4);
+    --radius:     14px;
+    --radius-sm:  8px;
+    --transition: 0.25s ease;
+  }
 
-/* HEADER */
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:15px;
-  background:#020617;
-}
+  /* ===== RESET ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text-main);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  img { display: block; max-width: 100%; }
+  button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+  a { text-decoration: none; color: inherit; }
 
-/* CART ICON (FIXED) */
-.cart-btn{
-  position:relative;
-  cursor:pointer;
-  font-size:18px;
-  padding:8px 14px;
-  background:#0f172a;
-  border-radius:10px;
-}
+  /* ===== NOISE OVERLAY ===== */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
 
-.cart-count{
-  position:absolute;
-  top:-6px;
-  right:-6px;
-  background:#ff4757;
-  font-size:11px;
-  padding:3px 6px;
-  border-radius:50%;
-}
+  /* ===== HEADER ===== */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(7,7,15,0.85);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo-wrap { display: flex; flex-direction: column; }
+  .logo-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.35rem;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, var(--gold), var(--purple-lite));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .logo-tag {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .header-right { display: flex; align-items: center; gap: 14px; }
 
-/* HERO */
-.hero{
-  height:60vh;
-  background:url('https://i.ibb.co/Lzt9b2kK/anime-style-character-with-lit-torch.jpg') center/cover;
-}
+  /* Cart icon in header */
+  .cart-btn-header {
+    position: relative;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    transition: var(--transition);
+  }
+  .cart-btn-header:hover { border-color: var(--purple); box-shadow: var(--glow); }
+  .cart-count {
+    position: absolute; top: -5px; right: -5px;
+    background: var(--gold);
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 800;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    display: none;
+  }
+  .cart-count.visible { display: flex; }
 
-/* PRODUCTS */
-.products{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:15px;
-  padding:15px;
-}
+  /* ===== HERO ===== */
+  .hero {
+    position: relative;
+    min-height: 88vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    text-align: center;
+  }
+  .hero-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    filter: brightness(0.5) saturate(1.2);
+    z-index: 0;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      rgba(7,7,15,0.2) 0%,
+      rgba(7,7,15,0.55) 60%,
+      rgba(7,7,15,0.98) 100%
+    );
+    z-index: 1;
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    padding: 40px 24px;
+    max-width: 680px;
+    animation: fadeUp 1s ease both;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(124,58,237,0.18);
+    border: 1px solid rgba(124,58,237,0.45);
+    color: var(--purple-lite);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(1.9rem, 6vw, 3.4rem);
+    line-height: 1.15;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 30%, var(--gold-lite) 70%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    color: rgba(232,224,255,0.75);
+    font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+    margin-bottom: 36px;
+    font-weight: 300;
+  }
+  .btn-hero {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--purple), #9d5cf0);
+    color: #fff;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    padding: 14px 34px;
+    border-radius: 100px;
+    box-shadow: 0 4px 28px rgba(124,58,237,0.55);
+    transition: var(--transition);
+  }
+  .btn-hero:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 36px rgba(124,58,237,0.7);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-.card{
-  background:#0f172a;
-  padding:10px;
-  border-radius:10px;
-}
-.card img{width:100%;border-radius:8px}
-.card button{
-  width:100%;
-  margin-top:8px;
-  background:#ff4757;
-  border:none;
-  padding:8px;
-  border-radius:6px;
-  color:#fff;
-}
+  /* ===== SECTION WRAPPER ===== */
+  .section { padding: 60px 16px; max-width: 1200px; margin: 0 auto; }
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, var(--text-main), var(--purple-lite));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .section-sub {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin-bottom: 32px;
+  }
 
-/* CART PANEL */
-.cart{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#020617;
-  max-height:80vh;
-  transform:translateY(100%);
-  transition:0.3s;
-  padding:15px;
-}
-.cart.open{transform:translateY(0)}
+  /* ===== CATEGORY FILTERS ===== */
+  .filters-wrap {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .filter-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 100px;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(124,58,237,0.45);
+  }
 
-.cart-item{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
-}
+  /* ===== PRODUCT GRID ===== */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: 24px;
+  }
+  .product-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .product-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(124,58,237,0.07), transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(124,58,237,0.3);
+    border-color: rgba(124,58,237,0.55);
+  }
+  .product-card.hidden { display: none; }
 
-/* TOAST */
-.toast{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#111;
-  padding:10px 20px;
-  border-radius:8px;
-  display:none;
-}
+  .product-img-wrap {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--bg-surface);
+  }
+  .product-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    background: var(--bg-surface);
+  }
+  .product-img-wrap img.broken {
+    opacity: 0;
+  }
+  .img-placeholder {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--bg-surface), #1a1a35);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-align: center;
+    padding: 16px;
+    pointer-events: none;
+  }
+  .img-placeholder .placeholder-icon { font-size: 2.4rem; opacity: 0.5; }
+  .img-placeholder p { line-height: 1.4; opacity: 0.7; }
+  .product-img-wrap.img-error .img-placeholder { display: flex; }
+  .product-img-wrap.img-error img { opacity: 0; }
+  .product-card:hover .product-img-wrap img { transform: scale(1.06); }
+
+  .product-cat-tag {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(7,7,15,0.75);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(124,58,237,0.35);
+    color: var(--purple-lite);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  .product-body {
+    padding: 16px;
+    display: flex; flex-direction: column; flex: 1;
+    position: relative; z-index: 1;
+  }
+  .product-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .product-desc {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin-bottom: 14px;
+    flex: 1;
+    font-style: italic;
+  }
+  .product-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+  }
+  .product-price {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.05rem;
+    color: var(--gold);
+  }
+  .btn-add {
+    background: linear-gradient(135deg, var(--purple), var(--purple-lite));
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    padding: 9px 16px;
+    border-radius: 100px;
+    transition: var(--transition);
+    box-shadow: 0 3px 14px rgba(124,58,237,0.4);
+    white-space: nowrap;
+  }
+  .btn-add:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(124,58,237,0.6); }
+  .btn-add.added {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    box-shadow: 0 3px 14px rgba(34,197,94,0.35);
+  }
+
+  /* ===== FLOATING BUTTONS ===== */
+  .fab-group {
+    position: fixed;
+    bottom: 24px; right: 20px;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
+    z-index: 200;
+  }
+  .fab {
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.5);
+    transition: var(--transition);
+    position: relative;
+  }
+  .fab:hover { transform: scale(1.1); }
+  .fab-wa {
+    background: #25d366;
+    color: #fff;
+  }
+  .fab-cart {
+    background: linear-gradient(135deg, var(--purple), var(--purple-lite));
+    color: #fff;
+  }
+  .fab-cart-count {
+    position: absolute; top: -4px; right: -4px;
+    background: var(--gold);
+    color: #000;
+    font-size: 0.6rem;
+    font-weight: 800;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    display: none;
+  }
+  .fab-cart-count.visible { display: flex; }
+
+  /* ===== CART MODAL ===== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    z-index: 300;
+    display: none; align-items: flex-end;
+    animation: none;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .cart-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    width: 100%;
+    max-width: 540px;
+    margin: 0 auto;
+    max-height: 92vh;
+    display: flex; flex-direction: column;
+    animation: slideUp 0.35s cubic-bezier(0.16,1,0.3,1) both;
+    box-shadow: 0 -10px 60px rgba(124,58,237,0.25);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .modal-header h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: linear-gradient(90deg, var(--text-main), var(--gold-lite));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .btn-close {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition);
+  }
+  .btn-close:hover { color: var(--danger); border-color: var(--danger); }
+
+  .cart-items { overflow-y: auto; flex: 1; padding: 12px 0; }
+
+  .cart-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.2s;
+  }
+  .cart-item:hover { background: rgba(255,255,255,0.02); }
+  .cart-item-img {
+    width: 60px; height: 60px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    margin-bottom: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cart-item-price { color: var(--gold); font-size: 0.8rem; font-weight: 700; }
+  .cart-item-subtotal { color: var(--text-muted); font-size: 0.72rem; }
+
+  .qty-ctrl {
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+  }
+  .qty-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition);
+  }
+  .qty-btn:hover { border-color: var(--purple); color: var(--purple); }
+  .qty-num {
+    font-weight: 700;
+    font-size: 0.88rem;
+    min-width: 20px;
+    text-align: center;
+  }
+  .btn-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1rem;
+    padding: 4px;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+  .btn-remove:hover { color: var(--danger); }
+
+  .cart-empty {
+    text-align: center; padding: 50px 20px;
+    color: var(--text-muted);
+  }
+  .cart-empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .cart-empty p { font-size: 0.88rem; }
+
+  .cart-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-surface);
+    border-radius: 0;
+    flex-shrink: 0;
+  }
+  .cart-total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .cart-total-label {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .cart-total-value {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    color: var(--gold);
+  }
+  .btn-checkout {
+    display: block; width: 100%;
+    background: linear-gradient(135deg, var(--purple), var(--purple-lite));
+    color: #fff;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    padding: 15px;
+    border-radius: 100px;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: 0 4px 20px rgba(124,58,237,0.5);
+  }
+  .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,58,237,0.65); }
+  .btn-checkout:disabled {
+    opacity: 0.45; pointer-events: none;
+  }
+
+  /* ===== ORDER FORM MODAL ===== */
+  .order-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    z-index: 400;
+    display: none; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .order-overlay.open { display: flex; }
+  .order-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 480px;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 80px rgba(124,58,237,0.35);
+    animation: popIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .order-header {
+    padding: 22px 22px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .order-header h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .order-form { padding: 22px; }
+
+  .order-summary-box {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 22px;
+    font-size: 0.82rem;
+  }
+  .order-summary-box h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .summary-item {
+    display: flex; justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-muted);
+  }
+  .summary-item:last-of-type { border-bottom: none; }
+  .summary-item span:last-child { color: var(--text-main); font-weight: 600; }
+  .summary-grand {
+    display: flex; justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+  }
+  .summary-grand span:last-child { color: var(--gold); font-size: 1.05rem; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+  }
+  .form-label span { color: var(--danger); margin-left: 2px; }
+  .form-input, .form-textarea {
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    padding: 11px 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.18);
+  }
+  .form-textarea { resize: vertical; min-height: 80px; }
+
+  .btn-place-order {
+    display: block; width: 100%;
+    background: linear-gradient(135deg, var(--gold), #e08e00);
+    color: #000;
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    padding: 15px;
+    border-radius: 100px;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: 0 4px 20px rgba(244,167,24,0.45);
+    margin-top: 6px;
+  }
+  .btn-place-order:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(244,167,24,0.6); }
+
+  /* ===== SUCCESS MESSAGE ===== */
+  .success-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 500;
+    display: none; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .success-overlay.open { display: flex; }
+  .success-box {
+    background: var(--bg-card);
+    border: 1px solid rgba(34,197,94,0.35);
+    border-radius: var(--radius);
+    padding: 40px 30px;
+    max-width: 420px; width: 100%;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(34,197,94,0.2);
+    animation: popIn 0.4s ease both;
+  }
+  .success-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .success-box h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+    color: var(--success);
+  }
+  .success-box p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 22px; line-height: 1.7; }
+  .btn-wa-success {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #25d366;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 12px 26px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+    transition: var(--transition);
+  }
+  .btn-wa-success:hover { transform: scale(1.04); }
+  .btn-dismiss {
+    display: block;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    padding: 10px 22px;
+    border-radius: 100px;
+    margin: 0 auto;
+    transition: var(--transition);
+  }
+  .btn-dismiss:hover { border-color: var(--purple); color: var(--purple); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    margin-top: 60px;
+    border-top: 1px solid var(--border);
+    padding: 40px 20px 28px;
+    text-align: center;
+    background: var(--bg-card);
+  }
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--gold), var(--purple-lite));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+  .footer-links { display: flex; gap: 20px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .footer-link { color: var(--text-muted); font-size: 0.82rem; transition: color 0.2s; }
+  .footer-link:hover { color: var(--purple-lite); }
+  .footer-copy { color: var(--text-muted); font-size: 0.75rem; }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--bg-surface);
+    border: 1px solid rgba(34,197,94,0.4);
+    color: var(--success);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 100px;
+    z-index: 600;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 10px; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (min-width: 600px) {
+    .cart-modal { border-radius: var(--radius); margin: auto; max-height: 85vh; }
+    .modal-overlay { align-items: center; }
+  }
 </style>
 </head>
-
 <body>
 
+<!-- ===== HEADER ===== -->
 <header>
-  <h2>OtakuSip</h2>
-  <div class="cart-btn" onclick="toggleCart()">
-    🛒 Cart
-    <span class="cart-count" id="count">0</span>
+  <div class="logo-wrap">
+    <span class="logo-name">OtakuSip</span>
+    <span class="logo-tag">Anime Mugs · Pune</span>
+  </div>
+  <div class="header-right">
+    <button class="cart-btn-header" onclick="openCart()" aria-label="Open cart">
+      🛒
+      <span class="cart-count" id="headerCount">0</span>
+    </button>
   </div>
 </header>
 
-<div class="hero"></div>
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <img class="hero-img"
+    src="https://i.ibb.co/60NNFZc8/Gemini-Generated-Image-35t55e35t55e35t5.png"
+    alt="OtakuSip hero banner — handcrafted anime mugs"
+    loading="eager"
+    onerror="this.style.display='none'">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge">✦ Handcrafted in India</div>
+    <h1>Handcrafted Anime Mugs<br>for True Fans</h1>
+    <p>Premium designs inspired by your favorite anime worlds.<br>Each mug tells a story worth sipping.</p>
+    <a href="#products" class="btn-hero">Shop Now &darr;</a>
+  </div>
+</section>
 
-<div class="products" id="products"></div>
+<!-- ===== PRODUCTS SECTION ===== -->
+<section class="section" id="products">
+  <p class="section-title">Our Collection</p>
+  <p class="section-sub">Every mug is a piece of art — handcrafted with love for true otakus.</p>
 
-<div class="cart" id="cart">
-  <h3>Your Cart</h3>
-  <div id="cartItems"></div>
-  <h4>Total: ₹<span id="total">0</span></h4>
+  <!-- FILTERS -->
+  <div class="filters-wrap" id="filterWrap">
+    <button class="filter-btn active" data-cat="all">All</button>
+  </div>
+
+  <!-- GRID -->
+  <div class="product-grid" id="productGrid"></div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-logo">OtakuSip</div>
+  <div class="footer-links">
+    <a class="footer-link" href="tel:8010286949">📞 8010286949</a>
+    <a class="footer-link" href="mailto:sarthakkhemka18@gmail.com">✉ Email Us</a>
+    <a class="footer-link" href="https://wa.me/918010286949" target="_blank">💬 WhatsApp</a>
+  </div>
+  <p class="footer-copy">© 2025 OtakuSip, Pune. All rights reserved.</p>
+</footer>
+
+<!-- ===== FAB GROUP ===== -->
+<div class="fab-group">
+  <a class="fab fab-wa" href="https://wa.me/918010286949" target="_blank" aria-label="Chat on WhatsApp">
+    <svg width="26" height="26" viewBox="0 0 32 32" fill="currentColor">
+      <path d="M16 3C9.373 3 4 8.373 4 15c0 2.385.67 4.61 1.832 6.5L4 29l7.678-1.814A11.94 11.94 0 0016 27c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 22a10 10 0 01-5.195-1.449l-.373-.225-3.872.914.936-3.776-.243-.387A10 10 0 1116 25zm5.485-7.345c-.3-.15-1.773-.873-2.048-.974-.274-.1-.474-.15-.674.15-.2.3-.773.974-.948 1.173-.174.2-.349.225-.648.075-.3-.15-1.267-.467-2.414-1.49-.892-.794-1.493-1.775-1.668-2.074-.174-.3-.019-.462.131-.611.134-.133.3-.349.45-.523.15-.175.2-.3.3-.499.1-.2.05-.374-.025-.524-.075-.15-.674-1.626-.924-2.224-.244-.587-.491-.507-.674-.516l-.574-.01c-.2 0-.524.075-.799.374s-1.049 1.024-1.049 2.498 1.074 2.898 1.224 3.098c.15.2 2.114 3.226 5.123 4.524.716.308 1.275.492 1.71.629.719.228 1.374.196 1.892.119.577-.085 1.773-.725 2.023-1.425.25-.7.25-1.299.175-1.425-.075-.125-.275-.2-.574-.35z"/>
+    </svg>
+  </a>
+  <button class="fab fab-cart" onclick="openCart()" aria-label="View cart">
+    🛒
+    <span class="fab-cart-count" id="fabCount">0</span>
+  </button>
 </div>
 
+<!-- ===== CART MODAL ===== -->
+<div class="modal-overlay" id="cartOverlay" onclick="handleCartOverlayClick(event)">
+  <div class="cart-modal">
+    <div class="modal-header">
+      <h2>🛒 Your Cart</h2>
+      <button class="btn-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span class="cart-total-label">Grand Total</span>
+        <span class="cart-total-value" id="cartTotal">₹0</span>
+      </div>
+      <button class="btn-checkout" id="checkoutBtn" onclick="openOrderForm()" disabled>
+        Proceed to Order ✦
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ORDER FORM MODAL ===== -->
+<div class="order-overlay" id="orderOverlay" onclick="handleOrderOverlayClick(event)">
+  <div class="order-modal">
+    <div class="order-header">
+      <h2>✦ Place Your Order</h2>
+      <button class="btn-close" onclick="closeOrderForm()">✕</button>
+    </div>
+    <div class="order-form">
+      <!-- Order Summary -->
+      <div class="order-summary-box" id="orderSummaryBox"></div>
+
+      <!-- Formspree Form -->
+      <form id="orderForm" action="https://formspree.io/f/xnjlepka" method="POST">
+        <!-- Hidden fields compiled by JS -->
+        <input type="hidden" name="Order Summary" id="hiddenOrderSummary">
+        <input type="hidden" name="_subject" id="hiddenSubject" value="New OtakuSip Order!">
+        <input type="hidden" name="Grand Total" id="hiddenTotal">
+
+        <div class="form-group">
+          <label class="form-label" for="custName">Customer Name <span>*</span></label>
+          <input class="form-input" type="text" id="custName" name="Customer Name" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="custPhone">Phone Number <span>*</span></label>
+          <input class="form-input" type="tel" id="custPhone" name="Phone Number" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="custAddress">Delivery Address <span>*</span></label>
+          <textarea class="form-textarea" id="custAddress" name="Delivery Address" placeholder="Full address with pincode" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="custNote">Special Instructions</label>
+          <textarea class="form-textarea" id="custNote" name="Special Instructions" placeholder="Any special requests or notes (optional)" style="min-height:60px;"></textarea>
+        </div>
+
+        <button type="submit" class="btn-place-order" id="placeOrderBtn">
+          ✦ Confirm Order
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SUCCESS MODAL ===== -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-box">
+    <div class="success-icon">🎉</div>
+    <h2>Order Placed!</h2>
+    <p>Thank you for ordering from <strong>OtakuSip</strong>! We've received your order and will contact you on WhatsApp shortly to confirm availability and delivery details.</p>
+    <a href="https://wa.me/918010286949" target="_blank" class="btn-wa-success">
+      💬 Chat on WhatsApp
+    </a><br>
+    <button class="btn-dismiss" onclick="dismissSuccess()">Continue Shopping</button>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
+<!-- ===== JAVASCRIPT ===== -->
 <script>
+/* ============================================
+   IMAGE ERROR HANDLING
+   ============================================ */
+function handleImgError(id) {
+  const wrap = document.getElementById('imgwrap-' + id);
+  if (wrap) wrap.classList.add('img-error');
+}
 
-/* PRODUCTS (ALL 6 INCLUDED) */
-const products = [
-{name:"Shadow Hokage Mug",price:699,img:"https://i.ibb.co/60NNFZc8/Gemini-Generated-Image-35t55e35t55e35t5.png"},
-{name:"Blue Shinobi Edition",price:649,img:"https://i.ibb.co/xKZ211Xs/Gemini-Generated-Image-7fspq87fspq87fsp-1.png"},
-{name:"Ocean Spirit Anime Mug",price:649,img:"https://i.ibb.co/Ps7X2ycq/Gemini-Generated-Image-ixgrorixgrorixgr.png"},
-{name:"Vintage Warrior Mug",price:699,img:"https://i.ibb.co/0pPx976F/Gemini-Generated-Image-fr0xjwfr0xjwfr0x.png"},
-{name:"Flame Curse Edition",price:799,img:"https://i.ibb.co/k694VZgW/Gemini-Generated-Image-e68fpme68fpme68f.png"},
-{name:"Rogue Ninja Black Mug",price:749,img:"https://i.ibb.co/zWh63kqr/Gemini-Generated-Image-i7okaei7okaei7ok.png"}
+const PRODUCTS = [
+  {
+    id: 1,
+    name: "Shadow Hokage Mug",
+    price: 699,
+    category: "Anime Collection Mugs",
+    img: "https://i.ibb.co/60NNFZc8/Gemini-Generated-Image-35t55e35t55e35t5.png",
+    desc: "Inspired by the legacy of a silent protector"
+  },
+  {
+    id: 2,
+    name: "Blue Shinobi Edition",
+    price: 649,
+    category: "Handcrafted Ceramic Mugs",
+    img: "https://i.ibb.co/xKZ211Xs/Gemini-Generated-Image-7fspq87fspq87fsp-1.png",
+    desc: "Classic ninja aesthetics with a bold blue finish"
+  },
+  {
+    id: 3,
+    name: "Ocean Spirit Anime Mug",
+    price: 649,
+    category: "Aesthetic Desk Mugs",
+    img: "https://i.ibb.co/Ps7X2ycq/Gemini-Generated-Image-ixgrorixgrorixgr.png",
+    desc: "Calm ocean tones blended with anime artistry"
+  },
+  {
+    id: 4,
+    name: "Vintage Warrior Mug",
+    price: 699,
+    category: "Premium & Limited Edition Mugs",
+    img: "https://i.ibb.co/0pPx976F/Gemini-Generated-Image-fr0xjwfr0xjwfr0x.png",
+    desc: "Old-school anime vibes with detailed craftsmanship"
+  },
+  {
+    id: 5,
+    name: "Flame Curse Edition",
+    price: 799,
+    category: "Dark Theme Anime Mugs",
+    img: "https://i.ibb.co/k694VZgW/Gemini-Generated-Image-e68fpme68fpme68f.png",
+    desc: "Dark energy design with fiery anime elements"
+  },
+  {
+    id: 6,
+    name: "Rogue Ninja Black Mug",
+    price: 749,
+    category: "Dark Theme Anime Mugs",
+    img: "https://i.ibb.co/zWh63kqr/Gemini-Generated-Image-i7okaei7okaei7ok.png",
+    desc: "Minimal black finish with intense anime detailing"
+  }
 ];
 
-let cart = [];
+/* ============================================
+   STATE
+   ============================================ */
+let cart = JSON.parse(localStorage.getItem('otakusip_cart') || '[]');
+let activeFilter = 'all';
 
-/* RENDER PRODUCTS */
-function renderProducts(){
-  document.getElementById("products").innerHTML =
-  products.map((p,i)=>`
-    <div class="card">
-      <img src="${p.img}">
-      <h4>${p.name}</h4>
-      ₹${p.price}
-      <button onclick="addToCart(${i})">Add to Cart</button>
+/* ============================================
+   INIT
+   ============================================ */
+(function init() {
+  buildFilters();
+  renderProducts();
+  updateCartUI();
+})();
+
+/* ============================================
+   FILTERS
+   ============================================ */
+function buildFilters() {
+  const wrap = document.getElementById('filterWrap');
+  const cats = [...new Set(PRODUCTS.map(p => p.category))];
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.cat = cat;
+    btn.textContent = cat;
+    btn.onclick = () => setFilter(cat, btn);
+    wrap.appendChild(btn);
+  });
+}
+
+function setFilter(cat, btnEl) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  renderProducts();
+}
+
+// "All" button
+document.querySelector('.filter-btn[data-cat="all"]').onclick = function() {
+  activeFilter = 'all';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  this.classList.add('active');
+  renderProducts();
+};
+
+/* ============================================
+   PRODUCTS RENDER
+   ============================================ */
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = '';
+  const list = activeFilter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === activeFilter);
+  list.forEach(p => {
+    const inCart = cart.some(c => c.id === p.id);
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.id = 'card-' + p.id;
+    card.innerHTML = `
+      <div class="product-img-wrap" id="imgwrap-${p.id}">
+        <img src="${p.img}"
+          alt="${p.name} — OtakuSip handcrafted anime mug"
+          loading="lazy"
+          onerror="handleImgError(${p.id})">
+        <div class="img-placeholder">
+          <span class="placeholder-icon">🍵</span>
+          <p><strong>${p.name}</strong><br>Image coming soon</p>
+        </div>
+        <span class="product-cat-tag">${p.category}</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">"${p.desc}"</div>
+        <div class="product-footer">
+          <span class="product-price">₹${p.price}</span>
+          <button class="btn-add ${inCart ? 'added' : ''}" id="addbtn-${p.id}" onclick="addToCart(${p.id})">
+            ${inCart ? '✓ Added' : '+ Add to Cart'}
+          </button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* ============================================
+   CART LOGIC
+   ============================================ */
+function addToCart(id) {
+  const product = PRODUCTS.find(p => p.id === id);
+  if (!product) return;
+  const existing = cart.find(c => c.id === id);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ id, name: product.name, price: product.price, img: product.img, qty: 1 });
+  }
+  saveCart();
+  updateCartUI();
+  updateAddBtn(id, true);
+  showToast('✓ ' + product.name + ' added!');
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(c => c.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) {
+    removeItem(id);
+    return;
+  }
+  saveCart();
+  renderCartItems();
+  updateBadges();
+}
+
+function removeItem(id) {
+  cart = cart.filter(c => c.id !== id);
+  saveCart();
+  renderCartItems();
+  updateBadges();
+  updateAddBtn(id, false);
+}
+
+function saveCart() {
+  localStorage.setItem('otakusip_cart', JSON.stringify(cart));
+}
+
+function getTotal() {
+  return cart.reduce((sum, c) => sum + c.price * c.qty, 0);
+}
+
+function getTotalQty() {
+  return cart.reduce((sum, c) => sum + c.qty, 0);
+}
+
+/* ============================================
+   UI UPDATES
+   ============================================ */
+function updateCartUI() {
+  renderCartItems();
+  updateBadges();
+}
+
+function updateBadges() {
+  const qty = getTotalQty();
+  const headerCount = document.getElementById('headerCount');
+  const fabCount = document.getElementById('fabCount');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  if (qty > 0) {
+    headerCount.textContent = qty;
+    headerCount.classList.add('visible');
+    fabCount.textContent = qty;
+    fabCount.classList.add('visible');
+    checkoutBtn.disabled = false;
+  } else {
+    headerCount.classList.remove('visible');
+    fabCount.classList.remove('visible');
+    checkoutBtn.disabled = true;
+  }
+}
+
+function updateAddBtn(id, added) {
+  const btn = document.getElementById('addbtn-' + id);
+  if (btn) {
+    btn.textContent = added ? '✓ Added' : '+ Add to Cart';
+    btn.classList.toggle('added', added);
+  }
+}
+
+function renderCartItems() {
+  const container = document.getElementById('cartItems');
+  const totalEl = document.getElementById('cartTotal');
+
+  if (cart.length === 0) {
+    container.innerHTML = `
+      <div class="cart-empty">
+        <div class="empty-icon">🍵</div>
+        <p>Your cart is empty.<br>Add some mugs to get started!</p>
+      </div>`;
+    totalEl.textContent = '₹0';
+    return;
+  }
+
+  container.innerHTML = cart.map(item => `
+    <div class="cart-item" id="ci-${item.id}">
+      <img class="cart-item-img" src="${item.img}" alt="${item.name}" loading="lazy">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">₹${item.price}</div>
+        <div class="cart-item-subtotal">Subtotal: ₹${item.price * item.qty}</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${item.id}, -1)" aria-label="Decrease">−</button>
+        <span class="qty-num">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id}, 1)" aria-label="Increase">+</button>
+      </div>
+      <button class="btn-remove" onclick="removeItem(${item.id})" aria-label="Remove">🗑</button>
     </div>
   `).join('');
+
+  totalEl.textContent = '₹' + getTotal();
 }
 
-/* ADD TO CART (FIXED LOGIC) */
-function addToCart(i){
-  let existing = cart.find(x => x.name === products[i].name);
+/* ============================================
+   CART MODAL OPEN/CLOSE
+   ============================================ */
+function openCart() {
+  document.getElementById('cartOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCart() {
+  document.getElementById('cartOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleCartOverlayClick(e) {
+  if (e.target === document.getElementById('cartOverlay')) closeCart();
+}
 
-  if(existing){
-    existing.qty++;
-  }else{
-    cart.push({...products[i], qty:1});
+/* ============================================
+   ORDER FORM OPEN/CLOSE
+   ============================================ */
+function openOrderForm() {
+  closeCart();
+  buildOrderSummary();
+  buildHiddenFields();
+  document.getElementById('orderOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeOrderForm() {
+  document.getElementById('orderOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleOrderOverlayClick(e) {
+  if (e.target === document.getElementById('orderOverlay')) closeOrderForm();
+}
+
+function buildOrderSummary() {
+  const box = document.getElementById('orderSummaryBox');
+  const items = cart.map(c => `
+    <div class="summary-item">
+      <span>${c.name} × ${c.qty}</span>
+      <span>₹${c.price * c.qty}</span>
+    </div>
+  `).join('');
+  box.innerHTML = `
+    <h3>Order Summary</h3>
+    ${items}
+    <div class="summary-grand">
+      <span>Grand Total</span>
+      <span>₹${getTotal()}</span>
+    </div>
+  `;
+}
+
+function buildHiddenFields() {
+  // Compile human-readable order summary for email
+  const lines = cart.map(c =>
+    `${c.name} (x${c.qty}) @ ₹${c.price} each = ₹${c.price * c.qty}`
+  ).join('\n');
+  const summary = `--- ORDER ITEMS ---\n${lines}\n\nGRAND TOTAL: ₹${getTotal()}\n\n--- Shop: OtakuSip, Pune ---`;
+  document.getElementById('hiddenOrderSummary').value = summary;
+  document.getElementById('hiddenTotal').value = '₹' + getTotal();
+  document.getElementById('hiddenSubject').value =
+    `New OtakuSip Order — ₹${getTotal()} from ${document.getElementById('custName').value || 'Customer'}`;
+}
+
+/* ============================================
+   FORM SUBMISSION
+   ============================================ */
+document.getElementById('orderForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  buildHiddenFields(); // refresh with current name
+
+  const btn = document.getElementById('placeOrderBtn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  const formData = new FormData(this);
+
+  try {
+    const res = await fetch(this.action, {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      // Success
+      closeOrderForm();
+      cart = [];
+      saveCart();
+      renderProducts(); // reset "Added" buttons
+      updateCartUI();
+      document.getElementById('successOverlay').classList.add('open');
+      this.reset();
+    } else {
+      const data = await res.json();
+      alert('Something went wrong: ' + (data.errors ? data.errors.map(e => e.message).join(', ') : 'Please try again.'));
+    }
+  } catch (err) {
+    alert('Network error. Please check your connection and try again.');
+  } finally {
+    btn.textContent = '✦ Confirm Order';
+    btn.disabled = false;
   }
+});
 
-  updateCart();
-  showToast("Added to cart 🛒");
+function dismissSuccess() {
+  document.getElementById('successOverlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
-/* UPDATE CART */
-function updateCart(){
-  document.getElementById("count").innerText =
-    cart.reduce((a,b)=>a+b.qty,0);
-
-  let total = 0;
-  let html = "";
-
-  if(cart.length===0){
-    html = "<p style='text-align:center;color:gray;'>Cart is empty</p>";
-  }
-
-  cart.forEach((item,i)=>{
-    total += item.price * item.qty;
-
-    html += `
-    <div class="cart-item">
-      <div>
-        ${item.name}<br>
-        ₹${item.price} × ${item.qty}
-      </div>
-      <div>
-        <button onclick="changeQty(${i},1)">+</button>
-        <button onclick="changeQty(${i},-1)">-</button>
-      </div>
-    </div>`;
-  });
-
-  document.getElementById("cartItems").innerHTML = html;
-  document.getElementById("total").innerText = total;
+/* ============================================
+   TOAST
+   ============================================ */
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
 }
-
-/* CHANGE QTY */
-function changeQty(i,val){
-  cart[i].qty += val;
-  if(cart[i].qty<=0) cart.splice(i,1);
-  updateCart();
-}
-
-/* TOGGLE CART */
-function toggleCart(){
-  document.getElementById("cart").classList.toggle("open");
-}
-
-/* TOAST */
-function showToast(msg){
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.style.display = "block";
-  setTimeout(()=>t.style.display="none",2000);
-}
-
-renderProducts();
-
 </script>
-
 </body>
 </html>
