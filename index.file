@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OtakuSip</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:#f8f9fb;color:#333}
+
+/* HEADER */
+header{
+  padding:15px;
+  text-align:center;
+  background:#111;
+  color:#fff;
+}
+header h1{font-size:24px}
+header p{font-size:14px;color:#ccc}
+
+/* HERO UPDATED */
+.hero{
+  position:relative;
+  height:70vh;
+  background:url('https://i.ibb.co/Lzt9b2kK/anime-style-character-with-lit-torch.jpg') center/cover no-repeat;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding-left:20px;
+}
+
+.hero::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+}
+
+.hero-content{
+  position:relative;
+  color:#fff;
+  text-align:left;
+  max-width:400px;
+}
+
+.hero h2{
+  font-size:34px;
+  font-weight:600;
+  margin-bottom:10px;
+}
+
+.hero p{
+  margin-bottom:20px;
+  opacity:0.9;
+}
+
+.hero button{
+  padding:10px 20px;
+  border:none;
+  background:#ff4757;
+  color:#fff;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* CATEGORY */
+.categories{
+  display:flex;
+  overflow:auto;
+  padding:10px;
+  gap:10px;
+}
+.categories button{
+  padding:8px 12px;
+  border:none;
+  background:#eee;
+  border-radius:20px;
+  cursor:pointer;
+}
+.categories button.active{background:#ff4757;color:#fff}
+
+/* PRODUCTS */
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:15px;
+  padding:15px;
+}
+.card{
+  background:#fff;
+  border-radius:10px;
+  padding:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+  transition:0.2s;
+}
+.card:hover{
+  transform:translateY(-5px);
+}
+.card img{width:100%;border-radius:8px}
+.card h4{font-size:14px;margin:5px 0}
+.card p{font-size:13px;color:#777}
+.price{font-weight:600;margin:5px 0}
+.card button{
+  width:100%;
+  padding:8px;
+  border:none;
+  background:#111;
+  color:#fff;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* CART BUTTON */
+.cart-btn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#ff4757;
+  color:#fff;
+  padding:12px;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+/* CART MODAL */
+.cart{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  max-height:80vh;
+  overflow:auto;
+  transform:translateY(100%);
+  transition:0.3s;
+  padding:15px;
+}
+.cart.open{transform:translateY(0)}
+
+/* WHATSAPP */
+.whatsapp{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  background:#25D366;
+  color:#fff;
+  padding:12px;
+  border-radius:50%;
+  text-decoration:none;
+}
+
+/* FORM */
+form input, form textarea{
+  width:100%;
+  padding:8px;
+  margin-bottom:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>OtakuSip</h1>
+  <p>Handcrafted Anime Mugs for True Fans</p>
+</header>
+
+<section class="hero">
+  <div class="hero-content">
+    <h2>Handcrafted Anime Mugs for True Fans</h2>
+    <p>Premium designs inspired by your favorite anime worlds</p>
+    <button onclick="scrollToProducts()">Shop Now</button>
+  </div>
+</section>
+
+<div class="categories" id="categories"></div>
+<div class="products" id="products"></div>
+
+<div class="cart-btn" onclick="toggleCart()">🛒 <span id="count">0</span></div>
+
+<div class="cart" id="cart">
+  <h3>Your Cart</h3>
+  <div id="cartItems"></div>
+  <h4>Total: ₹<span id="total">0</span></h4>
+
+  <form action="https://formspree.io/f/xnjlepka" method="POST" onsubmit="prepareOrder()">
+    <input name="Customer Name" placeholder="Name" required>
+    <input name="Phone Number" placeholder="Phone" required>
+    <textarea name="Address" placeholder="Address" required></textarea>
+    <textarea name="Instructions" placeholder="Instructions"></textarea>
+
+    <input type="hidden" name="Order Details" id="orderSummary">
+
+    <button type="submit">Place Order</button>
+  </form>
+
+  <p id="successMsg" style="display:none;color:green;">
+    Order placed! OtakuSip will contact you on WhatsApp.
+  </p>
+</div>
+
+<a class="whatsapp" href="https://wa.me/918010286949">💬</a>
+
+<script>
+
+const products = [
+{name:"Shadow Hokage Mug",price:699,cat:"Anime Collection Mugs",img:"https://i.ibb.co/60NNFZc8/Gemini-Generated-Image-35t55e35t55e35t5.png"},
+{name:"Blue Shinobi Edition",price:649,cat:"Handcrafted Ceramic Mugs",img:"https://i.ibb.co/xKZ211Xs/Gemini-Generated-Image-7fspq87fspq87fsp-1.png"},
+{name:"Ocean Spirit Anime Mug",price:649,cat:"Aesthetic Desk Mugs",img:"https://i.ibb.co/Ps7X2ycq/Gemini-Generated-Image-ixgrorixgrorixgr.png"},
+{name:"Vintage Warrior Mug",price:699,cat:"Premium & Limited Edition Mugs",img:"https://i.ibb.co/0pPx976F/Gemini-Generated-Image-fr0xjwfr0xjwfr0x.png"},
+{name:"Flame Curse Edition",price:799,cat:"Dark Theme Anime Mugs",img:"https://i.ibb.co/k694VZgW/Gemini-Generated-Image-e68fpme68fpme68f.png"},
+{name:"Rogue Ninja Black Mug",price:749,cat:"Dark Theme Anime Mugs",img:"https://i.ibb.co/zWh63kqr/Gemini-Generated-Image-i7okaei7okaei7ok.png"}
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function renderProducts(filter="All"){
+  let html="";
+  products.filter(p=>filter==="All"||p.cat===filter).forEach((p,i)=>{
+    html+=`
+    <div class="card">
+      <img src="${p.img}" loading="lazy">
+      <h4>${p.name}</h4>
+      <p>${p.cat}</p>
+      <div class="price">₹${p.price}</div>
+      <button onclick="addToCart(${i})">Add to Cart</button>
+    </div>`;
+  });
+  document.getElementById("products").innerHTML=html;
+}
+
+function renderCategories(){
+  const cats=["All",...new Set(products.map(p=>p.cat))];
+  document.getElementById("categories").innerHTML =
+    cats.map(c=>`<button onclick="renderProducts('${c}')">${c}</button>`).join('');
+}
+
+function addToCart(i){
+  let item=cart.find(x=>x.name===products[i].name);
+  if(item){item.qty++}
+  else{cart.push({...products[i],qty:1})}
+  updateCart();
+}
+
+function updateCart(){
+  localStorage.setItem("cart",JSON.stringify(cart));
+  document.getElementById("count").innerText = cart.reduce((a,b)=>a+b.qty,0);
+
+  let html="",total=0;
+  cart.forEach((item,i)=>{
+    total+=item.price*item.qty;
+    html+=`
+    <div>
+      ${item.name} x${item.qty}
+      <button onclick="changeQty(${i},1)">+</button>
+      <button onclick="changeQty(${i},-1)">-</button>
+      <button onclick="removeItem(${i})">x</button>
+    </div>`;
+  });
+
+  document.getElementById("cartItems").innerHTML=html;
+  document.getElementById("total").innerText=total;
+}
+
+function changeQty(i,val){
+  cart[i].qty+=val;
+  if(cart[i].qty<=0) cart.splice(i,1);
+  updateCart();
+}
+
+function removeItem(i){
+  cart.splice(i,1);
+  updateCart();
+}
+
+function toggleCart(){
+  document.getElementById("cart").classList.toggle("open");
+}
+
+function scrollToProducts(){
+  document.getElementById("products").scrollIntoView({behavior:'smooth'});
+}
+
+function prepareOrder(){
+  let summary="";
+  let total=0;
+
+  cart.forEach(i=>{
+    summary += `${i.name} x${i.qty} = ₹${i.price*i.qty}\n`;
+    total += i.price*i.qty;
+  });
+
+  summary += `Total: ₹${total}`;
+  document.getElementById("orderSummary").value = summary;
+
+  localStorage.removeItem("cart");
+  cart=[];
+  updateCart();
+
+  setTimeout(()=>{
+    document.getElementById("successMsg").style.display="block";
+  },500);
+}
+
+renderProducts();
+renderCategories();
+updateCart();
+
+</script>
+
+</body>
+</html>
